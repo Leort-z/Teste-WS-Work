@@ -1,7 +1,13 @@
-import List from './components/List'
+import { QueryClient, QueryClientProvider } from 'react-query'
 
-function App() {
-  return <List />
+import Table from './components/Table'
+
+const queryClient = new QueryClient()
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Table />
+    </QueryClientProvider>
+  )
 }
-
-export default App
