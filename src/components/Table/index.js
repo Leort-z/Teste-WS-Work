@@ -1,97 +1,77 @@
 import axios from 'axios'
 import { useQuery } from 'react-query'
 
+import { formatData, groupByBrand } from '../../utils/utils'
+
 import styles from './styles.module.scss'
 
-function formatData(data, isFromAPI) {
-  const formatter = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  })
+function getData(data) {
+  let carsData = []
+  let persistedCars = JSON.parse(localStorage.getItem('persistedCars'))
 
-  data.forEach((car) => {
-    const num = car.valor_fipe
-    if (isFromAPI) {
-      if (num % 1 !== 0) {
-        car.valor_fipe = formatter.format(Number.parseInt(car.valor_fipe.toString().replace('.', '') + '00'))
-      } else {
-        car.valor_fipe = formatter.format(Number.parseInt(car.valor_fipe.toString().replace('.', '') + '000'))
-      }
-    } else {
-      car.valor_fipe = formatter.format(car.valor_fipe)
-    }
-  })
+  if (persistedCars && data) {
+    persistedCars = formatData(persistedCars.array, false)
+    data = formatData(data.data.cars, true)
 
-  return data
-}
+    carsData = persistedCars.concat(data)
+    carsData = groupByBrand(carsData)
+  } else if (persistedCars && !data) {
+    persistedCars = formatData(persistedCars.array, false)
 
-function groupByBrand(data) {
-  const groupBy = (key) => (array) =>
-    array.reduce((objectsByKeyValue, obj) => {
-      const value = obj[key]
-      objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj)
-      return objectsByKeyValue
-    }, {})
+    carsData = groupByBrand(persistedCars)
+  } else if (!persistedCars && data) {
+    data = formatData(data.data.cars, true)
 
-  const groupByBrand = groupBy('marca_nome')
+    carsData = groupByBrand(data)
+  } else {
+    return null
+  }
 
-  return groupByBrand(data)
+  return carsData
 }
 
 export default function Table() {
-  let carsData = []
-  const persistedCars = JSON.parse(localStorage.getItem('persistedCars'))
+  let { data } = useQuery(['carsData'], () => axios.get('http://demo0566678.mockable.io/test-ws-front'), { refetchOnWindowFocus: false })
 
-  let { isLoading, error, data } = useQuery(['carsData'], () => axios.get('http://demo0566678.mockable.io/test-ws-front'), { refetchOnWindowFocus: false })
+  const carsData = getData(data)
 
-  if (isLoading) return 'Loading...'
-  if (error) return 'An error has occured: ' + error.message
-
-  if (data) {
-    data = formatData(data.data.cars, true)
-    console.log(data)
-    if (persistedCars) {
-      carsData = formatData(persistedCars.array, false)
-      console.log(carsData)
-      carsData = carsData.concat(data)
-      console.log(carsData)
-    }
-    carsData = groupByBrand(carsData)
-  }
-
-  return (
-    <main>
-      {Object.entries(carsData).map(([key, value], index) => {
-        return (
-          <div key={index}>
-            <h3>{key}</h3>
-            <table id={styles.mainTable}>
-              <thead>
-                <tr>
-                  <th>Modelo</th>
-                  <th>Ano</th>
-                  <th>Cor</th>
-                  <th>Combustível</th>
-                  <th>Nº de portas</th>
-                  <th>Valor FIPE</th>
-                </tr>
-              </thead>
-              <tbody>
-                {value.map((car) => (
-                  <tr key={car.id}>
-                    <td>{car.nome_modelo}</td>
-                    <td>{car.ano}</td>
-                    <td>{car.cor}</td>
-                    <td>{car.combustivel}</td>
-                    <td>{car.num_portas}</td>
-                    <td>{car.valor_fipe}</td>
+  if (carsData) {
+    return (
+      <main>
+        {Object.entries(carsData).map(([key, value], index) => {
+          return (
+            <div key={index}>
+              <h3>{key}</h3>
+              <table id={styles.mainTable}>
+                <thead>
+                  <tr>
+                    <th>Modelo</th>
+                    <th>Ano</th>
+                    <th>Cor</th>
+                    <th>Combustível</th>
+                    <th>Nº de portas</th>
+                    <th>Valor FIPE</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )
-      })}
-    </main>
-  )
+                </thead>
+                <tbody>
+                  {value.map((car, index) => (
+                    <tr key={index}>
+                      <td>{car.nome_modelo}</td>
+                      <td>{car.ano}</td>
+                      <td>{car.cor}</td>
+                      <td>{car.combustivel}</td>
+                      <td>{car.num_portas}</td>
+                      <td>{car.valor_fipe}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        })}
+      </main>
+    )
+  } else {
+    return <h2>Sem dados no momento, adicione um veículo ou tente novamente mais tarde</h2>
+  }
 }
