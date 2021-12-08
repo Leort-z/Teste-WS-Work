@@ -11,8 +11,3 @@ code {
 * {
   margin: 0;
 }
-
-#root {
-  display: flex;
-  justify-content: center;
-}
