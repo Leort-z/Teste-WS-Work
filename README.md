@@ -23,6 +23,7 @@ em consumir a API provida e apresentar os dados recebidos agrupados por marca de
 
 ## 🔗 [Clique aqui para acessar o projeto online](https://leort-z.github.io/Teste-WS-Work/)
 
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/57228993/145631800-3c52e3e8-5d29-4335-b4e4-5260f45a24d3.gif)
 
 
 ## ⚙ Tecnologias
