@@ -33,7 +33,7 @@ function getData(data) {
 }
 
 export default function Table() {
-  let { data } = useQuery(['carsData'], () => axios.get('http://demo0566678.mockable.io/test-ws-front'), { refetchOnWindowFocus: false })
+  let { data } = useQuery(['carsData'], () => axios.get('https://demo0566678.mockable.io/test-ws-front'), { refetchOnWindowFocus: false })
   const [carsData, setCarsData] = useState()
 
   useEffect(() => {
