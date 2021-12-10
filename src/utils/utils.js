@@ -23,7 +23,7 @@ export function formatData(data, isFromAPI) {
 export function groupByBrand(data) {
   const groupBy = (key) => (array) =>
     array.reduce((objectsByKeyValue, obj) => {
-      const value = obj[key]
+      const value = obj[key].toUpperCase()
       objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj)
       return objectsByKeyValue
     }, {})
